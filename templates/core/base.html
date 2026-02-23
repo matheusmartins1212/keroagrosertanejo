@@ -1,0 +1,191 @@
+{% load static %}
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Kero Agro{% endblock %}</title>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <!-- quebra cache -->
+  <link rel="stylesheet" href="{% static 'css/site.css' %}?v=20260216-footer-admincfg">
+</head>
+
+{% with url_name=request.resolver_match.url_name %}
+<body class="{% if url_name == 'home' %}home-page{% endif %}{% if url_name == 'noticia_detalhe' %} noticia-page{% endif %}">
+
+  <!-- =========================
+       TOPO NORMAL
+       ========================= -->
+  <header class="top-banner" id="top-banner">
+    <div class="container top-banner__inner">
+      <a href="{% url 'home' %}" class="brand brand--center" aria-label="Kero Agro">
+        <img src="{% static 'img/logo.png' %}" class="brand__logo brand__logo--big" alt="Kero Agro">
+      </a>
+    </div>
+  </header>
+
+  <nav class="menu" id="main-menu">
+    <div class="container menu__inner">
+      {% for c in categorias %}
+        <a
+          class="menu__item
+            {% if request.GET.cat == c.slug %} menu__item--active{% endif %}
+            {% if not request.GET.cat and forloop.first %} menu__item--active{% endif %}"
+          href="{% url 'home' %}?cat={{ c.slug }}"
+        >
+          {{ c.nome }}
+        </a>
+      {% endfor %}
+    </div>
+  </nav>
+
+  <!-- =========================
+       G1BAR (sticky no scroll) — HOME e NOTÍCIA
+       ========================= -->
+  {% if url_name == "home" or url_name == "noticia_detalhe" %}
+    <header class="g1bar g1bar--sticky" id="g1barSticky" aria-hidden="true">
+      <div class="container g1bar__inner">
+        <button class="g1bar__menuBtn" type="button"
+                aria-label="Abrir menu" aria-controls="g1drawerSticky"
+                aria-expanded="false" id="g1MenuBtnSticky">
+          <span class="g1bar__hamb"></span>
+        </button>
+
+        <form class="g1bar__search" action="{% url 'buscar' %}" method="get">
+          <input type="search" name="q" placeholder="Buscar..." value="{{ request.GET.q|default_if_none:'' }}">
+          <button type="submit" aria-label="Buscar">
+            <i class="fa-solid fa-magnifying-glass"></i>
+          </button>
+        </form>
+
+        <div class="g1bar__socials" aria-label="Redes sociais">
+          {% for s in SOCIAL_LINKS %}
+            {% if s.platform == 'instagram' %}
+              <a href="{{ s.url }}" target="_blank" rel="noopener" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
+            {% elif s.platform == 'youtube' %}
+              <a href="{{ s.url }}" target="_blank" rel="noopener" aria-label="YouTube"><i class="fa-brands fa-youtube"></i></a>
+            {% elif s.platform == 'x' %}
+              <a href="{{ s.url }}" target="_blank" rel="noopener" aria-label="X"><i class="fa-brands fa-x-twitter"></i></a>
+            {% elif s.platform == 'facebook' %}
+              <a href="{{ s.url }}" target="_blank" rel="noopener" aria-label="Facebook"><i class="fa-brands fa-facebook"></i></a>
+            {% elif s.platform == 'whatsapp' %}
+              <a href="{{ s.url }}" target="_blank" rel="noopener" aria-label="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
+            {% endif %}
+          {% endfor %}
+        </div>
+      </div>
+    </header>
+
+    <nav class="g1drawer" id="g1drawerSticky" aria-hidden="true">
+      <div class="g1drawer__head">
+        <strong>Menu</strong>
+        <button class="g1drawer__close" type="button" aria-label="Fechar menu" id="g1CloseBtnSticky">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <ul class="g1drawer__list">
+        {% for c in categorias %}
+          <li><a href="{% url 'home' %}?cat={{ c.slug }}">{{ c.nome }}</a></li>
+        {% endfor %}
+      </ul>
+    </nav>
+
+    <div class="g1backdrop" id="g1BackdropSticky" hidden></div>
+  {% endif %}
+
+  <main class="container">
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- =========================
+       FOOTER NOVO (editável pelo admin)
+       ========================= -->
+  <footer class="site-footer">
+    <div class="container site-footer__grid">
+
+      <!-- Coluna esquerda: identidade / sobre -->
+      <div class="site-footer__brand">
+        <div class="site-footer__brandRow">
+          <img src="{% static 'img/logo.png' %}" class="site-footer__logo" alt="Kero Agro">
+          <div>
+            <div class="site-footer__name">
+              {{ PORTAL_CONFIG.about_name|default:"Kero Agro" }}
+            </div>
+            <div class="site-footer__tag">
+              {{ PORTAL_CONFIG.about_tagline|default:"Portal de notícias do agro e sertanejo" }}
+            </div>
+          </div>
+        </div>
+
+        <p class="site-footer__text">
+          {{ PORTAL_CONFIG.about_text|default:"O Kero Agro é um portal de conteúdo sobre agricultura, pecuária, agronegócio e cultura sertaneja. Informação com linguagem simples, visual limpo e foco no que importa no campo."|safe }}
+        </p>
+
+        <p class="site-footer__text site-footer__text--muted">
+          {{ PORTAL_CONFIG.about_text_muted|default:"Produzimos conteúdo com responsabilidade e independência editorial."|safe }}
+        </p>
+      </div>
+
+      <!-- Coluna direita: redes sociais -->
+      <div class="site-footer__right">
+        <div class="site-footer__titleRow">
+          <h3 class="site-footer__title">Redes sociais</h3>
+          <span class="site-footer__line" aria-hidden="true"></span>
+        </div>
+
+        {% if SOCIAL_LINKS %}
+          <div class="site-footer__socialGrid" aria-label="Redes sociais da Kero Agro">
+            {% for s in SOCIAL_LINKS %}
+              {% if s.platform == 'instagram' %}
+                <a class="site-footer__socialBtn" href="{{ s.url }}" target="_blank" rel="noopener" aria-label="Instagram">
+                  <i class="fa-brands fa-instagram"></i>
+                  <span>Instagram</span>
+                </a>
+              {% elif s.platform == 'youtube' %}
+                <a class="site-footer__socialBtn" href="{{ s.url }}" target="_blank" rel="noopener" aria-label="YouTube">
+                  <i class="fa-brands fa-youtube"></i>
+                  <span>YouTube</span>
+                </a>
+              {% elif s.platform == 'x' %}
+                <a class="site-footer__socialBtn" href="{{ s.url }}" target="_blank" rel="noopener" aria-label="X">
+                  <i class="fa-brands fa-x-twitter"></i>
+                  <span>X</span>
+                </a>
+              {% elif s.platform == 'facebook' %}
+                <a class="site-footer__socialBtn" href="{{ s.url }}" target="_blank" rel="noopener" aria-label="Facebook">
+                  <i class="fa-brands fa-facebook"></i>
+                  <span>Facebook</span>
+                </a>
+              {% elif s.platform == 'whatsapp' %}
+                <a class="site-footer__socialBtn" href="{{ s.url }}" target="_blank" rel="noopener" aria-label="WhatsApp">
+                  <i class="fa-brands fa-whatsapp"></i>
+                  <span>WhatsApp</span>
+                </a>
+              {% endif %}
+            {% endfor %}
+          </div>
+        {% else %}
+          <p class="site-footer__text site-footer__text--muted">
+            Cadastre suas redes sociais no admin (Social Links) e marque como “Visível no topo”.
+          </p>
+        {% endif %}
+      </div>
+
+    </div>
+
+    <div class="site-footer__bottom">
+      <div class="container site-footer__bottomInner">
+        <span>{{ PORTAL_CONFIG.copyright_text|default:"© 2026 Kero Agro — Portal de notícias do agro." }}</span>
+        <span class="site-footer__dot" aria-hidden="true">•</span>
+        <a class="site-footer__link" href="{% url 'home' %}">Início</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="{% static 'js/site.js' %}?v=20260210-proportal4"></script>
+</body>
+</html>
+{% endwith %}

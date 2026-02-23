@@ -1,0 +1,45 @@
+{% extends "core/base.html" %}
+{% block title %}Buscar{% endblock %}
+
+{% block content %}
+  <section class="search-page">
+    <div class="search-head">
+      <h1 class="section-title" style="margin-top:18px;">Busca</h1>
+
+      {% if q %}
+        <p class="search-sub">Resultados para: <strong>{{ q }}</strong></p>
+      {% else %}
+        <p class="search-sub">Digite algo na busca acima.</p>
+      {% endif %}
+    </div>
+
+    {% if noticias %}
+      <div class="latest-list search-list">
+        {% for n in noticias %}
+          <a class="latest-item" href="{% url 'noticia_detalhe' n.slug %}">
+            {% if n.imagem %}
+              <img class="latest-img" src="{{ n.imagem.url }}" alt="{{ n.titulo }}">
+            {% endif %}
+
+            <div class="latest-body">
+              <span class="kicker">{{ n.categoria.nome }}</span>
+              <div class="latest-title">{{ n.titulo }}</div>
+              <div class="meta">{{ n.publicado_em|default:n.criado_em|date:"d/m/Y H:i" }}</div>
+              {% if n.resumo %}
+                <div class="latest-resumo">{{ n.resumo|truncatewords_html:24|safe }}</div>
+              {% endif %}
+            </div>
+          </a>
+        {% endfor %}
+      </div>
+    {% else %}
+      {% if q %}
+        <div class="card" style="margin-top:12px;">
+          <div class="card__body">
+            <small>Nenhum resultado.</small>
+          </div>
+        </div>
+      {% endif %}
+    {% endif %}
+  </section>
+{% endblock %}

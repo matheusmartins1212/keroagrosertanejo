@@ -1,0 +1,139 @@
+{% extends "core/base.html" %}
+
+{% block title %}Kero Agro{% endblock %}
+
+{% block content %}
+
+  {% if destaque_principal or ultimas_publicacoes %}
+
+    <!-- =========================
+         DESTAQUES (CAPA)
+         ========================= -->
+    <section class="home-hero">
+
+      {# ✅ destaque principal SEM "caixinha" #}
+      <div class="hero-main hero-main--clean">
+        {% if destaque_principal %}
+          <a class="card--link" href="{% url 'noticia_detalhe' destaque_principal.slug %}">
+            {% if destaque_principal.imagem %}
+              <img class="hero-img" src="{{ destaque_principal.imagem.url }}" alt="{{ destaque_principal.titulo }}">
+            {% endif %}
+            <div class="hero-main__body">
+              <span class="kicker">{{ destaque_principal.categoria.nome }}</span>
+              <h1 class="h1">{{ destaque_principal.titulo }}</h1>
+              <div class="meta">{{ destaque_principal.criado_em|date:"d/m/Y H:i" }}</div>
+              <div class="lead">{{ destaque_principal.resumo|truncatewords_html:28|safe }}</div>
+              <span class="link link--ghost">Ler mais</span>
+            </div>
+          </a>
+        {% else %}
+          {# fallback visual caso ainda não tenha marcado um principal #}
+          {% with head=ultimas_publicacoes.0 %}
+            <a class="card--link" href="{% url 'noticia_detalhe' head.slug %}">
+              {% if head.imagem %}
+                <img class="hero-img" src="{{ head.imagem.url }}" alt="{{ head.titulo }}">
+              {% endif %}
+              <div class="hero-main__body">
+                <span class="kicker">{{ head.categoria.nome }}</span>
+                <h1 class="h1">{{ head.titulo }}</h1>
+                <div class="meta">{{ head.criado_em|date:"d/m/Y H:i" }}</div>
+                <div class="lead">{{ head.resumo|truncatewords_html:28|safe }}</div>
+                <span class="link link--ghost">Ler mais</span>
+              </div>
+            </a>
+          {% endwith %}
+        {% endif %}
+      </div>
+
+      <div class="hero-side">
+        <h3 class="block-title">Destaques</h3>
+
+        <div class="mini-grid">
+          {% for n in destaques_menores %}
+            <a class="mini-card" href="{% url 'noticia_detalhe' n.slug %}">
+              {% if n.imagem %}
+                <img src="{{ n.imagem.url }}" alt="{{ n.titulo }}">
+              {% endif %}
+              <div class="mini-body">
+                <span class="mini-k">{{ n.categoria.nome }}</span>
+                <div class="mini-t">{{ n.titulo }}</div>
+                <div class="mini-m">{{ n.criado_em|date:"d/m/Y" }}</div>
+              </div>
+            </a>
+          {% empty %}
+            <div class="mini-empty card">
+              <div class="card__body">
+                <small>
+                  Marque notícias como <b>Destaque secundário</b> no admin para aparecerem aqui.
+                </small>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+
+    </section>
+
+    <!-- =========================
+         ÚLTIMAS PUBLICAÇÕES
+         ========================= -->
+    <section class="home-section">
+      <div class="home-section__head">
+        <h2 class="section-title">Últimas publicações</h2>
+      </div>
+
+      <div class="latest-list">
+        {% for n in ultimas_publicacoes %}
+          <a class="latest-item" href="{% url 'noticia_detalhe' n.slug %}">
+            {% if n.imagem %}
+              <img class="latest-img" src="{{ n.imagem.url }}" alt="{{ n.titulo }}">
+            {% endif %}
+
+            <div class="latest-body">
+              <span class="kicker">{{ n.categoria.nome }}</span>
+              <div class="latest-title">{{ n.titulo }}</div>
+              <div class="meta">{{ n.criado_em|date:"d/m/Y H:i" }}</div>
+              {% if n.resumo %}
+                <div class="latest-resumo">{{ n.resumo|truncatewords_html:22|safe }}</div>
+              {% endif %}
+            </div>
+          </a>
+        {% endfor %}
+      </div>
+    </section>
+
+    <!-- =========================
+         MAIS LIDAS
+         ========================= -->
+    <section class="home-section">
+      <div class="home-section__head">
+        <h2 class="section-title">Mais lidas</h2>
+      </div>
+
+      <div class="most-grid">
+        {% for n in mais_lidas %}
+          <a class="most-item" href="{% url 'noticia_detalhe' n.slug %}">
+            <div class="most-rank">{{ forloop.counter }}</div>
+            <div class="most-title">{{ n.titulo }}</div>
+            <div class="most-meta">{{ n.categoria.nome }} • {{ n.criado_em|date:"d/m/Y" }}</div>
+          </a>
+        {% empty %}
+          <div class="card">
+            <div class="card__body">
+              <small>As “Mais lidas” vão aparecer automaticamente conforme as notícias recebem acessos.</small>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </section>
+
+  {% else %}
+    <div class="card">
+      <div class="card__body">
+        <h2 style="margin:0 0 10px;">Kero Agro</h2>
+        <p style="margin:0; color:#444;">Sem notícias ainda. Crie uma notícia no admin.</p>
+      </div>
+    </div>
+  {% endif %}
+
+{% endblock %}

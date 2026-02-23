@@ -1,0 +1,55 @@
+{% extends "core/base.html" %}
+
+{% block title %}{{ noticia.titulo }}{% endblock %}
+
+{% block content %}
+  <div class="article-wrap">
+
+    <article class="article article--clean">
+
+      <header class="article-head">
+        <span class="kicker">{{ noticia.categoria.nome }}</span>
+
+        <h1 class="h1">{{ noticia.titulo }}</h1>
+
+        <div class="meta">
+          {{ noticia.publicado_em|default:noticia.criado_em|date:"d/m/Y H:i" }}
+        </div>
+
+        {% if noticia.resumo and noticia.resumo|length > 0 %}
+          <div class="lead">{{ noticia.resumo|safe }}</div>
+        {% endif %}
+      </header>
+
+      {% if noticia.imagem %}
+        <figure class="article-figure">
+          <img class="article-img" src="{{ noticia.imagem.url }}" alt="{{ noticia.titulo }}">
+        </figure>
+      {% endif %}
+
+      <div class="content article-content">
+        {{ noticia.conteudo|safe }}
+      </div>
+
+    </article>
+
+    {% if relacionadas %}
+      <h2 class="section-title">Relacionadas</h2>
+
+      <section class="cards">
+        {% for n in relacionadas %}
+          <a class="news news--link" href="{% url 'noticia_detalhe' n.slug %}">
+            {% if n.imagem %}
+              <img src="{{ n.imagem.url }}" alt="{{ n.titulo }}">
+            {% endif %}
+            <div class="p">
+              <p class="t">{{ n.titulo }}</p>
+              <p class="m">{{ n.categoria.nome }} • {{ n.criado_em|date:"d/m/Y" }}</p>
+            </div>
+          </a>
+        {% endfor %}
+      </section>
+    {% endif %}
+
+  </div>
+{% endblock %}
